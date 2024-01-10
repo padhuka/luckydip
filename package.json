@@ -24,7 +24,9 @@
     "build": "vue-tsc && vite build",
     "preview": "vite preview"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/vue-fortune-wheel.umd.cjs",
   "module": "./dist/vue-fortune-wheel.js",
   "exports": {
