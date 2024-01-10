@@ -1,11 +1,11 @@
 <template>
   <div id="app" class="container">
     <div class="row">
-      <div class="col-md-6">
-        <h2> Canvas </h2>
+      <div class="col-md-12">
+        <h2>Lucky Dip Honda</h2>
 
         <FortuneWheel
-          style="width: 500px; max-width: 100%;"
+          style="width: 500px; max-width: 100%"
           :verify="canvasVerify"
           :canvas="canvasOptions"
           :prizes="prizesCanvas"
@@ -14,10 +14,11 @@
         />
 
         <div>
-          <input type="checkbox" v-model="canvasVerify"> 模拟请求：等待 {{ verifyDuration }}s 再转
+          <input type="checkbox" v-model="canvasVerify" /> Lucky Draw
+          {{ verifyDuration }}s
         </div>
       </div>
-      <div class="col-md-6">
+      <!-- <div class="col-md-6">
         <h2> Image </h2>
 
         <FortuneWheel
@@ -47,17 +48,17 @@
           <br/> 点击按钮，可在旋转中强行改变结果,
           <br/> 最好在旋转减速前, 大约一半的时间之前, 最好一次旋转只改变一次
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import FortuneWheel from './components/FortuneWheel/index.vue'
 import { PrizeConfig } from './components/FortuneWheel/types'
 
-const prizeId = ref(0)
+// const prizeId = ref(0)
 
 const canvasVerify = ref(false)
 const verifyDuration = 2
@@ -65,59 +66,70 @@ const canvasOptions = {
   btnWidth: 140,
   borderColor: '#584b43',
   borderWidth: 6,
-  lineHeight: 30
+  lineHeight: 30,
 }
 
 const prizesCanvas: PrizeConfig[] = [
   {
     id: 1,
-    name: 'Blue', // 奖品名
-    value: 'Blue\'s value', // 奖品值
+    name: '1 Juta', // 奖品名
+    value: '1.000.000', // 奖品值
     bgColor: '#45ace9', // 背景色
     color: '#ffffff', // 字体色
-    probability: 30 // 概率，最多保留 4 位小数
+    probability: 10, // 概率，最多保留 4 位小数
   },
   {
     id: 2,
-    name: 'Red',
-    value: 'Red\'s value',
+    name: '1,5 Juta',
+    value: '1.500.000',
     bgColor: '#dd3832',
     color: '#ffffff',
-    probability: 40
+    probability: 5,
   },
   {
     id: 3,
-    name: 'Yellow',
-    value: 'Yellow\'s value',
+    name: '2 Juta',
+    value: '2.000.000',
     bgColor: '#fef151',
     color: '#ffffff',
-    probability: 30
-  }
-]
-
-const prizesImage: PrizeConfig[] = [
-  {
-    id: 1,
-    value: 'Blue\'s value', // 奖品值
-    weight: 1 // 权重
+    probability: 5,
   },
   {
-    id: 2,
-    value: 'Red\'s value',
-    weight: 0
+    id: 4,
+    name: 'ZONK',
+    value: 'ZONK',
+    bgColor: '#69717d',
+    color: '#ffffff',
+    probability: 80,
   },
-  {
-    id: 3,
-    value: 'Yellow\'s value',
-    weight: 0
-  }
 ]
 
-const prizeRes = computed(() => {
-  return prizesCanvas.find(item => item.id === prizeId.value) || prizesCanvas[0]
-})
+// const prizesImage: PrizeConfig[] = [
+//   {
+//     id: 1,
+//     value: "Blue's value", // 奖品值
+//     weight: 1, // 权重
+//   },
+//   {
+//     id: 2,
+//     value: "Red's value",
+//     weight: 0,
+//   },
+//   {
+//     id: 3,
+//     value: "Yellow's value",
+//     weight: 0,
+//   },
+// ]
 
-function testRequest (verified: boolean, duration: number) { // 参数 1: 是否通过验证, 2: 延迟时间
+// const prizeRes = computed(() => {
+//   return (
+//     prizesCanvas.find((item) => item.id === prizeId.value) || prizesCanvas[0]
+//   )
+// })
+
+function testRequest(verified: boolean, duration: number) {
+  // 参数 1: 是否通过验证, 2: 延迟时间
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(verified)
@@ -125,7 +137,7 @@ function testRequest (verified: boolean, duration: number) { // 参数 1: 是否
   })
 }
 
-function onCanvasRotateStart (rotate: Function) {
+function onCanvasRotateStart(rotate: Function) {
   if (canvasVerify.value) {
     const verified = true // true: 测试通过验证, false: 测试未通过验证
     testRequest(verified, verifyDuration * 1000).then((verifiedRes) => {
@@ -142,18 +154,17 @@ function onCanvasRotateStart (rotate: Function) {
   console.log('onCanvasRotateStart')
 }
 
-function onImageRotateStart () {
-  console.log('onImageRotateStart')
-}
+// function onImageRotateStart() {
+//   console.log('onImageRotateStart')
+// }
 
-function onRotateEnd (prize: PrizeConfig) {
+function onRotateEnd(prize: PrizeConfig) {
   alert(prize.value)
 }
 
-function onChangePrize (id: number) {
-  prizeId.value = id
-}
-  
+// function onChangePrize(id: number) {
+//   prizeId.value = id
+// }
 </script>
 
 <style lang="scss" scoped>
