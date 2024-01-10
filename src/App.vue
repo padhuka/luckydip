@@ -2,68 +2,129 @@
   <div id="app" class="container">
     <div class="row">
       <div class="col-md-12">
-        <h2>Lucky Dip Honda</h2>
+        <h2>Lucky Draw - Showroom Event Honda</h2>
+        <div>
+          <h1 class="text-4xl bg-emerald-800 font-bold rounded-xl p-10">
+            {{ day }} , {{ currenDay }} / {{ month }} / {{ year }}
+          </h1>
+        </div>
 
-        <FortuneWheel
-          style="width: 500px; max-width: 100%"
-          :verify="canvasVerify"
-          :canvas="canvasOptions"
-          :prizes="prizesCanvas"
-          @rotateStart="onCanvasRotateStart"
-          @rotateEnd="onRotateEnd"
-        />
+        <div class="container" v-if="!showDraw">
+          <form>
+            <label for="fname">Nama</label>
+            <input
+              v-model="nama"
+              required
+              type="text"
+              id="nama"
+              name="nama"
+              placeholder="Input Nama"
+            />
+
+            <label for="lname">Nomor SPK</label>
+            <input
+              v-model="spk"
+              required
+              type="text"
+              id="spk"
+              name="spk"
+              placeholder="No. SPK"
+            />
+
+            <!-- <label for="cabang">Cabang</label>
+            <select v-model="cabang" name="cabang">
+              <option value="HSB">HSB</option>
+              <option value="BPM">BPM</option>
+              <option value="HPK">HPK</option>
+              <option value="HBM">HBM</option>
+              <option value="HSM">HSM</option>
+              <option value="HLP">HLP</option>
+              <option value="HBT">HBT</option>
+            </select> -->
+
+            <input type="submit" value="Submit" @click="submitForm" />
+          </form>
+        </div>
+        <div v-if="showDraw">
+          <FortuneWheel
+            style="width: 400px; max-width: 100%"
+            :verify="canvasVerify"
+            :canvas="canvasOptions"
+            :prizes="prizesCanvas"
+            @rotateStart="onCanvasRotateStart"
+            @rotateEnd="onRotateEnd"
+          />
+        </div>
 
         <div>
+          <h1 class="text-4xl bg-emerald-800 font-bold rounded-xl p-10">
+            Jam : {{ hour }} : {{ minute }} : {{ second }}
+          </h1>
+        </div>
+
+        <!-- <div>
           <input type="checkbox" v-model="canvasVerify" /> Lucky Draw
           {{ verifyDuration }}s
-        </div>
+        </div> -->
       </div>
-      <!-- <div class="col-md-6">
-        <h2> Image </h2>
-
-        <FortuneWheel
-          style="width: 500px; max-width: 100%;"
-          type="image"
-          :useWeight="true"
-          :verify="canvasVerify"
-          :prizeId="prizeId"
-          :angleBase="-2"
-          :prizes="prizesImage"
-          @rotateStart="onImageRotateStart"
-          @rotateEnd="onRotateEnd"
-        >
-          <template #wheel>
-            <img src="./assets/wheel.png" style="width: 100%;transform: rotateZ(60deg)" />
-          </template>
-          <template #button>
-            <img src="./assets/button.png" style="width: 180px"/>
-          </template>
-        </FortuneWheel>
-
-        <div class="btn-list">
-          <div class="btn" v-for="(item, idx) in prizesCanvas" :key="idx" :style="{ background: item.bgColor }" @click="onChangePrize(item.id)"></div>
-        </div>
-        <div class="wheel-result">
-          当前 100% <span :style="{ background: prizeRes.bgColor }"></span>
-          <br/> 点击按钮，可在旋转中强行改变结果,
-          <br/> 最好在旋转减速前, 大约一半的时间之前, 最好一次旋转只改变一次
-        </div>
-      </div> -->
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import FortuneWheel from './components/FortuneWheel/index.vue'
-import { PrizeConfig } from './components/FortuneWheel/types'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import FortuneWheel from './components/fortuneWheel/index.vue'
+import { PrizeConfig } from './components/fortuneWheel/types'
+import Swal from 'sweetalert2'
 
+const nama = ref(null)
+const spk = ref(null)
+const cabang = ref(null)
+const date = ref(new Date(Date.now()))
+const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+const months = [
+  'Januari',
+  'Februari',
+  'Maret',
+  'April',
+  'Mei',
+  'Juni',
+  'Agustus',
+  'September',
+  'Oktober',
+  'November',
+  'Desember',
+]
+const day = ref(days[date.value.getDay()])
+const hour = ref(date.value.getHours())
+const minute = ref(date.value.getMinutes())
+const second = ref(date.value.getSeconds())
+const month = months[date.value.getMonth()]
+const currenDay = date.value.getDate()
+const year = date.value.getFullYear()
+
+const updateDate = () => {
+  date.value = new Date(Date.now())
+  hour.value = date.value.getHours()
+  minute.value = date.value.getMinutes()
+  second.value = date.value.getSeconds()
+}
+const intervalId = ref(null)
+
+onMounted(() => {
+  intervalId.value = setInterval(updateDate, 1000)
+})
+onBeforeUnmount(() => {
+  clearInterval(intervalId.value)
+})
 // const prizeId = ref(0)
 
 const canvasVerify = ref(false)
+const showDraw = ref(false)
+
 const verifyDuration = 2
 const canvasOptions = {
-  btnWidth: 140,
+  btnWidth: 100,
   borderColor: '#584b43',
   borderWidth: 6,
   lineHeight: 30,
@@ -76,7 +137,7 @@ const prizesCanvas: PrizeConfig[] = [
     value: '1.000.000', // 奖品值
     bgColor: '#45ace9', // 背景色
     color: '#ffffff', // 字体色
-    probability: 10, // 概率，最多保留 4 位小数
+    probability: 30, // 概率，最多保留 4 位小数
   },
   {
     id: 2,
@@ -96,37 +157,13 @@ const prizesCanvas: PrizeConfig[] = [
   },
   {
     id: 4,
-    name: 'ZONK',
-    value: 'ZONK',
+    name: '500 Rb',
+    value: '500.000',
     bgColor: '#69717d',
     color: '#ffffff',
-    probability: 80,
+    probability: 60,
   },
 ]
-
-// const prizesImage: PrizeConfig[] = [
-//   {
-//     id: 1,
-//     value: "Blue's value", // 奖品值
-//     weight: 1, // 权重
-//   },
-//   {
-//     id: 2,
-//     value: "Red's value",
-//     weight: 0,
-//   },
-//   {
-//     id: 3,
-//     value: "Yellow's value",
-//     weight: 0,
-//   },
-// ]
-
-// const prizeRes = computed(() => {
-//   return (
-//     prizesCanvas.find((item) => item.id === prizeId.value) || prizesCanvas[0]
-//   )
-// })
 
 function testRequest(verified: boolean, duration: number) {
   // 参数 1: 是否通过验证, 2: 延迟时间
@@ -135,6 +172,16 @@ function testRequest(verified: boolean, duration: number) {
       resolve(verified)
     }, duration)
   })
+}
+
+function submitForm() {
+  if (nama.value != null && spk.value != null) {
+    showDraw.value = true
+    localStorage.setItem('nama', nama.value)
+    localStorage.setItem('spk', spk.value)
+  }
+
+  return
 }
 
 function onCanvasRotateStart(rotate: Function) {
@@ -154,17 +201,22 @@ function onCanvasRotateStart(rotate: Function) {
   console.log('onCanvasRotateStart')
 }
 
-// function onImageRotateStart() {
-//   console.log('onImageRotateStart')
-// }
-
 function onRotateEnd(prize: PrizeConfig) {
-  alert(prize.value)
+  // alert(prize.value)
+  Swal.fire({
+    title:
+      'Selamat, Yth Bapak/Ibu ' +
+      localStorage.getItem('nama') +
+      ' Nomor Pemesanan ' +
+      localStorage.getItem('spk') +
+      ' Mendapatkan Rp. ' +
+      prize.value,
+    icon: 'success',
+    confirmButtonText: 'Tutup',
+  })
+  // localStorage.removeItem('nama')
+  // localStorage.removeItem('spk')
 }
-
-// function onChangePrize(id: number) {
-//   prizeId.value = id
-// }
 </script>
 
 <style lang="scss" scoped>
